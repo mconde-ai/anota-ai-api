@@ -1,18 +1,19 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { HttpAdapterHost } from '@nestjs/core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const httpAdapterHost = app.get(HttpAdapterHost);
 
+  const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // Remove propriedades que não estão no DTO
-    forbidNonWhitelisted: true, // Lança um erro se propriedades extras forem enviadas
-    transform: true, // Transforma o payload para a instância do DTO
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
   }));
 
   const config = new DocumentBuilder()
@@ -26,6 +27,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(3000);
+  await app.init();
+  const expressApp = app.getHttpAdapter().getInstance();
+  return expressApp;
 }
-bootstrap();
+
+export default bootstrap();
