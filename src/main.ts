@@ -21,6 +21,10 @@ async function configureApp(app: INestApplication) {
   // Habilita o CORS para permitir requisições de diferentes origens (essencial para frontends).
   app.enableCors();
 
+  // Define um prefixo global para todas as rotas da API.
+  // Ex: /users se torna /api/users
+  app.setGlobalPrefix('api');
+
   const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
 
@@ -41,7 +45,7 @@ async function configureApp(app: INestApplication) {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
