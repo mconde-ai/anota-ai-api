@@ -1,7 +1,9 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { absolutePath } from 'swagger-ui-dist';
+import { ApiExcludeController } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @Controller()
 export class SwaggerController {
   @Get('swagger-ui-dist/*')

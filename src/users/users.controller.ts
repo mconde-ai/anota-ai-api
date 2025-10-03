@@ -12,7 +12,8 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ResponseUserDto } from './dto/response-user.dto';
 
 /**
  * @class UsersController
@@ -25,7 +26,8 @@ export class UsersController {
 
   @Post()
   @ApiOperation({ summary: 'Cria um novo usuário' })
-  @ApiResponse({ status: 201, description: 'O usuário foi criado com sucesso.' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({ status: 201, description: 'O usuário foi criado com sucesso.', type: ResponseUserDto })
   @ApiResponse({ status: 409, description: 'O e-mail fornecido já está em uso.' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -33,14 +35,14 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: 'Lista todos os usuários' })
-  @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.', type: [ResponseUserDto] })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Busca um usuário pelo ID' })
-  @ApiResponse({ status: 200, description: 'Usuário encontrado com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Usuário encontrado com sucesso.', type: ResponseUserDto })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
@@ -48,7 +50,8 @@ export class UsersController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza um usuário' })
-  @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.', type: ResponseUserDto })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
