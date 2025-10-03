@@ -6,8 +6,11 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HttpAdapterHost } from '@nestjs/core';
 import { INestApplication } from '@nestjs/common';
 
-// Função para configurar a aplicação.
+// Função de configuração reutilizável
 async function configureApp(app: INestApplication) {
+  // MELHORIA 1: Habilitar CORS
+  app.enableCors();
+
   const httpAdapterHost = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
   app.useGlobalPipes(new ValidationPipe({
@@ -28,28 +31,35 @@ async function configureApp(app: INestApplication) {
   SwaggerModule.setup('api/docs', app, document);
 }
 
-// Lógica para rodar localmente (npm run start:dev)
+// Lógica para rodar localmente
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await configureApp(app); // Aplica as configurações
-  await app.listen(3000);
+  await configureApp(app);
+
+  // MELHORIA 2: Usar a porta do ambiente ou 3000 como padrão
+  await app.listen(process.env.PORT || 3000);
 }
 
-// Se não estiver no ambiente Vercel, roda o servidor local
-if (!process.env.VERCEL) {
-  bootstrap();
-}
-
-// Lógica para o Vercel (o que será exportado)
+// Lógica para o Vercel
 let cachedApp: INestApplication;
 
+async function bootstrapServerless() {
+    if (!cachedApp) {
+        const app = await NestFactory.create(AppModule);
+        await configureApp(app);
+        await app.init();
+        cachedApp = app;
+    }
+    return cachedApp;
+}
+
 export default async function handler(req, res) {
-  if (!cachedApp) {
-    const app = await NestFactory.create(AppModule);
-    await configureApp(app); // Aplica as configurações
-    await app.init();
-    cachedApp = app;
-  }
-  const expressApp = cachedApp.getHttpAdapter().getInstance();
-  expressApp(req, res);
+    const app = await bootstrapServerless();
+    const expressApp = app.getHttpAdapter().getInstance();
+    expressApp(req, res);
+}
+
+// Inicia o servidor local apenas se não estiver no ambiente Vercel
+if (process.env.NODE_ENV !== 'production') {
+    bootstrap();
 }
