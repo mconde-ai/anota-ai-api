@@ -12,9 +12,13 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger'; // Importar decorators
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('users') // Agrupa todos os endpoints deste controller sob a tag "users"
+/**
+ * @class UsersController
+ * Expõe os endpoints da API para o gerenciamento de usuários (CRUD).
+ */
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
