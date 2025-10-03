@@ -2,25 +2,25 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)
-<!--
-  TODO: Adicione o badge de deploy do Vercel aqui.
-  Você pode obtê-lo no dashboard do seu projeto no Vercel.
-  Exemplo: [![Vercel Status](https://vercel.com/_/button?sql_project=...)]
--->
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmconde-ai%2Fanota-ai-api)
 
-API desenvolvida como solução para o desafio técnico da Anota AI. O projeto consiste em um sistema para contagem de acessos e gerenciamento de usuários, construído com foco em boas práticas, escalabilidade e segurança.
+API desenvolvida como solução para o desafio técnico da Anota AI. O projeto consiste em um sistema para contagem de acessos e gerenciamento de usuários, construído com foco em boas práticas, escalabilidade, segurança e observabilidade.
 
 > **API em produção:** [https://anota-ai-api.vercel.app/api/docs](https://anota-ai-api.vercel.app/api/docs)
-> *(Substitua pelo link real do seu deploy no Vercel)*
 
 ## ✨ Funcionalidades
 
+- ✅ **Health Check:**
+  - `GET /`: Endpoint de verificação de saúde que monitora a conectividade com o banco de dados. Retorna status `200` se a API estiver saudável.
 - ✅ **Contador de Acessos:**
   - `POST /analytics/increment`: Rota para incrementar o contador de acessos (utilizando operações atômicas para evitar condições de corrida).
   - `GET /analytics/count`: Rota para consultar o número total de acessos.
-- ✅ **Gerenciamento de Usuários:**
-  - `POST /users`: Rota para criar um novo usuário com validação de dados e senha criptografada com `bcrypt`.
-  - `GET /users/:id`: Rota para visualizar as informações de um usuário específico (sem expor a senha).
+- ✅ **Gerenciamento de Usuários (CRUD Completo):**
+  - `POST /users`: Rota para criar um novo usuário com validação de dados e senha criptografada.
+  - `GET /users`: Rota para listar todos os usuários.
+  - `GET /users/:id`: Rota para visualizar um usuário específico.
+  - `PATCH /users/:id`: Rota para atualizar parcialmente um usuário.
+  - `DELETE /users/:id`: Rota para remover um usuário.
 - ✨ **Bônus Implementados:**
   - **Testes Automatizados:** Suíte de testes de ponta a ponta (E2E) com Jest e Supertest.
   - **Documentação Interativa:** Documentação gerada automaticamente com Swagger (OpenAPI).
@@ -33,6 +33,7 @@ API desenvolvida como solução para o desafio técnico da Anota AI. O projeto c
   - **Node.js**
   - **TypeScript**
   - **NestJS:** Framework progressivo para aplicações eficientes e escaláveis.
+  - **Terminus:** Para implementação de Health Checks.
 - **Banco de Dados:**
   - **MongoDB:** Banco de dados NoSQL orientado a documentos.
   - **Mongoose:** ODM para modelagem e validação de dados.
@@ -58,7 +59,7 @@ Siga os passos abaixo para rodar a aplicação no seu ambiente de desenvolviment
 
 1.  **Clone o repositório:**
     ```bash
-    git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
+    git clone https://github.com/mconde-ai/anota-ai-api.git
     ```
 
 2.  **Navegue até a pasta do projeto:**
@@ -76,7 +77,6 @@ Siga os passos abaixo para rodar a aplicação no seu ambiente de desenvolviment
       ```bash
       cp .env.example .env
       ```
-    - O arquivo `.env` já virá configurado para o ambiente Docker local.
 
 5.  **Inicie o banco de dados com Docker:**
     - Verifique se o Docker Desktop está em execução.
@@ -106,8 +106,3 @@ Para garantir a qualidade e a integridade da aplicação, execute os testes auto
   ```bash
   npm run test:e2e
   ```
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-*(Você pode criar um arquivo LICENSE se quiser, ou remover esta linha)*
