@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SwaggerModule as CustomSwaggerModule } from './swagger/swagger.module';
+import { HealthModule } from './health/health.module';
+import { HealthController } from './health/health.controller';
+import { TerminusModule } from '@nestjs/terminus'; 
 
 @Module({
   imports: [
@@ -30,11 +31,14 @@ import { SwaggerModule as CustomSwaggerModule } from './swagger/swagger.module';
     }),
 
     // Módulos de funcionalidade da aplicação
+    TerminusModule,
+    HealthModule,
     CustomSwaggerModule,
     UsersModule,
     AnalyticsModule,
+    
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [HealthController],
+  providers: [],
 })
 export class AppModule {}
