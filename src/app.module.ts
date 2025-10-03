@@ -5,26 +5,15 @@ import { UsersModule } from './users/users.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 
 @Module({
   imports: [
     /**
-     * Carrega e disponibiliza as variáveis de ambiente de forma global para a aplicação.
-     * Lê a partir de um arquivo .env na raiz do projeto.
+     * Carrega e disponibiliza as variáveis de ambiente (do arquivo .env)
+     * de forma global para toda a aplicação.
      */
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-
-    /**
-     * Módulo para servir arquivos estáticos. Essencial para que o Swagger UI funcione
-     * corretamente em ambientes serverless como o Vercel.
-     */
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'swagger-static'),
-      serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/api/docs',
     }),
 
     /**

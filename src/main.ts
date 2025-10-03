@@ -1,43 +1,52 @@
-import { NestFactory } from '@nestjs/core';
+/**
+ * @file Ponto de entrada da aplicação NestJS.
+ * Configura e inicializa o servidor, aplicando middlewares globais,
+ * pipes, filtros e a documentação Swagger.
+ * Contém lógica para rodar tanto em ambiente de desenvolvimento local quanto em
+ * ambiente serverless (Vercel).
+ */
+
+import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
-import { HttpAdapterHost } from '@nestjs/core';
-import { INestApplication } from '@nestjs/common';
 
 /**
- * Função de configuração reutilizável para a aplicação NestJS.
- * Aplica configurações globais como CORS, pipes de validação e filtros de exceção.
- * @param app A instância da aplicação NestJS.
+ * Aplica configurações globais à instância da aplicação NestJS.
+ * Esta função é reutilizada tanto para o servidor local quanto para o serverless.
+ * @param {INestApplication} app - A instância da aplicação NestJS.
  */
 async function configureApp(app: INestApplication) {
-  // Habilita o CORS para permitir que o frontend (em outro domínio) acesse a API.
+  // Habilita o CORS para permitir requisições de diferentes origens (essencial para frontends).
   app.enableCors();
 
   const httpAdapterHost = app.get(HttpAdapterHost);
-  // Registra um filtro global para capturar todas as exceções não tratadas.
-  // Isso garante que a API sempre retorne um JSON padronizado em caso de erro.
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // Remove propriedades que não existem no DTO.
-    forbidNonWhitelisted: true, // Lança um erro se propriedades inesperadas forem enviadas.
-    transform: true, // Transforma o payload para a instância correta do DTO.
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
-  // Configuração do Swagger para gerar a documentação da API.
   const config = new DocumentBuilder()
     .setTitle('Anota AI API Challenge')
     .setDescription('API para contagem de acessos e gerenciamento de usuários.')
     .setVersion('1.0')
     .addTag('analytics', 'Operações relacionadas ao contador de acessos')
     .addTag('users', 'Operações relacionadas aos usuários')
-    // ... (configuração do swagger)
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    customSiteTitle: 'Anota AI API Docs',
+  });
 }
 
 /**
@@ -47,45 +56,43 @@ async function configureApp(app: INestApplication) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await configureApp(app);
-
   // Usa a porta definida no ambiente ou 3000 como padrão.
   await app.listen(process.env.PORT || 3000);
 }
 
 // --- Lógica para compatibilidade com Vercel Serverless ---
 
-// Mantém uma instância da aplicação em cache para melhorar a performance em ambientes serverless,
-// evitando recriar a aplicação a cada requisição.
+// Mantém uma instância da aplicação em cache para melhorar a performance,
+// evitando recriar a aplicação a cada requisição no ambiente serverless.
 let cachedApp: INestApplication;
 
-
 /**
- * Inicializa a aplicação NestJS para o ambiente serverless.
- * Usa uma instância em cache se já existir.
+ * Inicializa a aplicação NestJS para o ambiente serverless, utilizando cache.
+ * @returns {Promise<INestApplication>} A instância da aplicação NestJS pronta.
  */
 async function bootstrapServerless() {
-    if (!cachedApp) {
-        const app = await NestFactory.create(AppModule);
-        await configureApp(app);
-        await app.init();
-        cachedApp = app;
-    }
-    return cachedApp;
+  if (!cachedApp) {
+    const app = await NestFactory.create(AppModule);
+    await configureApp(app);
+    await app.init();
+    cachedApp = app;
+  }
+  return cachedApp;
 }
 
 /**
  * Handler principal exportado para o Vercel.
- * Cada requisição recebida pelo Vercel invocará esta função.
+ * Cada requisição HTTP recebida pelo Vercel invocará esta função.
  */
 export default async function handler(req, res) {
-    const app = await bootstrapServerless();
-    const expressApp = app.getHttpAdapter().getInstance();
-    expressApp(req, res);
+  const app = await bootstrapServerless();
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp(req, res);
 }
 
 // Condicional para iniciar o servidor local:
-// Se a variável de ambiente NODE_ENV não for 'production' (como é no Vercel),
-// a função bootstrap() é chamada para iniciar o servidor local.
+// Se não estivermos em um ambiente de produção (como o Vercel),
+// a função bootstrap() é chamada para iniciar o servidor local tradicional.
 if (process.env.NODE_ENV !== 'production') {
-    bootstrap();
+  bootstrap();
 }
