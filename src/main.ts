@@ -42,10 +42,17 @@ async function configureApp(app: INestApplication) {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-    customSiteTitle: 'Anota AI API Docs',
+    // Aponta para os assets servidos pelo nosso SwaggerController
+    customSwaggerUiPath: require.resolve('swagger-ui-dist/absolute-path.js'),
+    customfavIcon: 'https://static.swagger.io/asset/favicon-32x32.png',
+    customCssUrl: [
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.1.0/swagger-ui.min.css',
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.1.0/swagger-ui-standalone-preset.min.css',
+    ],
+    customJs: [
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.1.0/swagger-ui-bundle.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.1.0/swagger-ui-standalone-preset.js',
+    ],
   });
 }
 

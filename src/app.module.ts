@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SwaggerModule as CustomSwaggerModule } from './swagger/swagger.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
 
     // Módulos de funcionalidade da aplicação
+    CustomSwaggerModule,
     UsersModule,
     AnalyticsModule,
   ],
